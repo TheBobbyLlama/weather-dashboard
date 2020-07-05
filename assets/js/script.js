@@ -11,7 +11,7 @@ var myKey = [
 	"1008",
 ];
 
-var uvLevels = [ "uvNone", "uvWarning", "uvDanger" ];
+var uvLevels = [ "uvNone", "uvModerate", "uvHigh", "uvVeryHigh", "uvExtreme" ];
 
 var curCity;
 var savedCities = JSON.parse(localStorage.getItem("dashboardCities")) || [];
@@ -132,9 +132,31 @@ var showCurrentWeather = function(data) {
 	containerEl.appendChild(buildEl);
 
 	// ----- UV Index -----
-	tmpVal = data.current.uvi;
+	switch (Math.floor(data.current.uvi)) {
+		case 0:
+		case 1:
+		case 2:
+			tmpVal = "uvNone";
+		case 3:
+		case 4:
+		case 5:
+			tmpVal = "uvModerate";
+			break;
+		case 6:
+		case 7:
+			tmpVal = "uvHigh";
+			break;
+		case 8:
+		case 9:
+		case 10:
+			tmpVal = "uvVeryHigh";
+			break;
+		default:
+			tmpVal = "uvExtreme";
+	}
+	
 	buildEl = document.createElement("p");
-	buildEl.innerHTML = "UV Index: " + "<span class='" + uvLevels[Math.min(tmpVal / 4, 2)] + "'>" + tmpVal + "</span>";
+	buildEl.innerHTML = "UV Index: " + "<span class='" + tmpVal + "'>" + data.current.uvi + "</span>";
 	containerEl.appendChild(buildEl);
 
 	resultEl.appendChild(containerEl);

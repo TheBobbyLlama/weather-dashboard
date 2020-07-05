@@ -171,14 +171,28 @@ header {
 	padding: 4px;
 }
 
-.uvWarning {
+.uvModerate {
 	background-color: #ffd040;
 	border-radius: 2px;
 	padding: 4px;
 }
 
-.uvDanger {
+.uvHigh {
+	background-color: #d06040;
+	border-radius: 2px;
+	color: white;
+	padding: 4px;
+}
+
+.uvVeryHigh {
 	background-color: #ff2000;
+	border-radius: 2px;
+	color: white;
+	padding: 4px;
+}
+
+.uvExtreme {
+	background-color: #d040a0;
 	border-radius: 2px;
 	color: white;
 	padding: 4px;
