@@ -21,6 +21,7 @@ var searchButton = document.querySelector("#searchBtn");
 var resultEl = document.querySelector("#result");
 var cityListEl = document.querySelector("#cityList");
 
+// Event handler for search button.
 var searchCity = function(event) {
 	var myCity = cityEl.value;
 
@@ -34,9 +35,11 @@ var searchCity = function(event) {
 	getCityInfo(myCity);
 };
 
+// Event handler for clicking on saved city items.
 var showSavedCity = function(event) {
 	var cityId
 	
+	// If user hit a <span> element, it's a deletion button.
 	if (event.target.tagName === "SPAN") {
 		cityId = event.target.parentNode.getAttribute("data-city-id");
 
@@ -44,6 +47,7 @@ var showSavedCity = function(event) {
 			savedCities.splice(cityId, 1);
 			saveCity(null); // Force localStorage update.
 		}
+	// Otherwise, they should have clicked on a city name.
 	} else {
 		cityId = event.target.getAttribute("data-city-id");
 
@@ -52,6 +56,7 @@ var showSavedCity = function(event) {
 	}
 };
 
+// API handler function.  Passes data to showWeatherInfo if successful.
 var getCityInfo = function(cityName) {
 	var buildKey = "";
 
@@ -59,12 +64,14 @@ var getCityInfo = function(cityName) {
 		buildKey += myKey[(5 * i) % myKey.length];
 	}
 
+	// Use a fetch for current weather to get the info needed for our OneCall hit.
 	fetch("https://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&units=imperial&appid=" + buildKey)
 		.then(function(response) {
 			if (response.ok) {
 				response.json().then(function(data) {
-					curCity = data.name;
+					curCity = data.name; // Also store properly formatted name for later.
 
+					// Hit the OneCall API to get all of the info we need.
 					fetch("https://api.openweathermap.org/data/2.5/onecall?lat=" + data.coord.lat + "&lon=" + data.coord.lon + "&exclude=minutely,hourly&units=imperial&cnt=5&appid=" + buildKey)
 					.then(function(response) {
 						if (response.ok) {
@@ -90,6 +97,7 @@ var getCityInfo = function(cityName) {
 	cityEl.value = "";
 };
 
+// Manages data returned from the API.
 var showWeatherInfo = function(data) {
 	resultEl.innerHTML = "";
 	showCurrentWeather(data);
@@ -97,6 +105,7 @@ var showWeatherInfo = function(data) {
 	saveCity(curCity);
 };
 
+// Displays current weather information to the page.
 var showCurrentWeather = function(data) {
 	var tmpVal;
 	var buildEl;
@@ -131,6 +140,7 @@ var showCurrentWeather = function(data) {
 	resultEl.appendChild(containerEl);
 }
 
+// Displays forecast information to the page.
 var showForecast = function(data) {
 	console.log(data);
 
@@ -177,6 +187,7 @@ var showForecast = function(data) {
 	resultEl.appendChild(containerEl);
 }
 
+// Refreshes the list of saved cities.
 var displaySavedCities = function() {
 	cityListEl.textContent = "";
 
@@ -188,8 +199,10 @@ var displaySavedCities = function() {
 	}
 };
 
+// Updates the list of saved cities.
 var saveCity = function(cityName) {
 	if (savedCities.indexOf(cityName) < 0) {
+		// If we weren't given a proper city name, force an update so deletions are recorded.
 		if (cityName) {
 			savedCities.push(cityName);
 			savedCities.sort();
