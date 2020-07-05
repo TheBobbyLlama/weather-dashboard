@@ -71,6 +71,30 @@ header {
 	margin-bottom: 4px;
 }
 
+#cityList {
+	list-style-type: none;
+	margin-top: 20px;
+}
+
+#cityList li {
+	background-color: white;
+	border: solid 1px #e0e0e0;
+	border-radius: 3px;
+	cursor: pointer;
+	height: 28px;
+	padding: 5px 10px;
+}
+
+#cityList li + li {
+	margin-top: 4px;
+}
+
+#cityList li:hover {
+	background-color: #4080ff;
+	border: none;
+	color: white;
+}
+
 #result {
 	/*background-color: orange;*/
 	padding: 20px;
@@ -81,13 +105,26 @@ header {
 	padding: 20px;
 }
 
+#result div:first-child h3 {
+	color: white;
+	font-size: 22px;
+	padding: 0px 10px 6px 10px;
+}
+
 #result div + div {
 	border-top: solid 2px #e0e0e0;
 	margin-top: 20px;
 }
 
 #result h3 {
-	font-size: 22px;
+	background-color: #a0c0ff;
+}
+
+#result h3 img {
+	height: 32px;
+	position: relative;
+	top: 6px;
+	width: 32px;
 }
 
 #result p {

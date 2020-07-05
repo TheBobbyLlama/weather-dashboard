@@ -28,19 +28,31 @@ var searchCity = function(event) {
 		return;
 	}
 
+	getCityInfo(myCity);
+}
+
+var showSavedCity = function(event) {
+	var cityId = event.target.getAttribute("data-city-id");
+
+	if ((cityId) && (savedCities[cityId]))
+		getCityInfo(savedCities[cityId]);
+}
+
+var getCityInfo = function(cityName) {
 	var buildKey = "";
 
 	for (var i = 0; i < myKey.length; i++) {
 		buildKey += myKey[(5 * i) % myKey.length];
 	}
 
-	fetch("https://api.openweathermap.org/data/2.5/weather?q=" + myCity + "&appid=" + buildKey)
+	fetch("https://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&appid=" + buildKey)
 		.then(function(response) {
 			if (response.ok) {
 				response.json().then(function(data) {
 					resultEl.innerHTML = "";
-					myCity = showCurrentWeather(data);
-					showForecast(myCity);
+					showCurrentWeather(data); // Also use this to pull out a properly formatted city name.
+					showForecast(data.sys.id);
+					saveCity(data.name);
 				});
 			} else {
 				resultEl.innerHTML = "<h3 class='error'>Error: " + response.statusText + "</h3>";
@@ -58,14 +70,12 @@ var showCurrentWeather = function(data) {
 
 	console.log(data);
 
-	var tmpVal
-	var tmpClass
 	var buildEl
 	var containerEl = document.createElement("div");
 
 	// ----- Header - City/Date/Icon -----
 	buildEl = document.createElement("h3");
-	buildEl.textContent = cityName + " (" + moment().format("MM/DD/YYYY") + ")";
+	buildEl.innerHTML = cityName + " (" + moment().format("MM/DD/YYYY") + ") <img src='http://openweathermap.org/img/wn/" + data.weather[0].icon + ".png' />";
 	// TODO- Icon!
 	containerEl.appendChild(buildEl);
 
@@ -84,15 +94,9 @@ var showCurrentWeather = function(data) {
 	buildEl.textContent = "Wind Speed: " + data.wind.speed + " MPH";
 	containerEl.appendChild(buildEl);
 
-	// ----- UV Index -----
-	tmpVal = "TODO!"
-	buildEl = document.createElement("p");
-	buildEl.textContent = "UV Index: " + tmpVal;
-	containerEl.appendChild(buildEl);
+	// Can't get UV Index to appear like mockup???
 
 	resultEl.appendChild(containerEl);
-
-	return cityName;
 }
 
 var showForecast = function(cityName) {
@@ -100,7 +104,14 @@ var showForecast = function(cityName) {
 }
 
 var displaySavedCities = function() {
-	console.log("Displaying saved cities!")
+	cityListEl.textContent = "";
+
+	for (var i = 0; i < savedCities.length; i++) {
+		var listEl = document.createElement("li");
+		listEl.setAttribute("data-city-id", i);
+		listEl.textContent = savedCities[i];
+		cityListEl.appendChild(listEl);
+	}
 };
 
 var saveCity = function(cityName) {
@@ -119,5 +130,6 @@ var convertTempKtoF = function(temp) {
 }
 
 searchButton.addEventListener("click", searchCity);
+cityListEl.addEventListener("click", showSavedCity);
 
 displaySavedCities();
