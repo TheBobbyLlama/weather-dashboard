@@ -40,6 +40,7 @@ header {
 	cursor: pointer;
 	height: 28px;
 	padding: 5px 28px 5px 10px;
+	position: relative;
 }
 
 #cityList li + li {
@@ -49,6 +50,27 @@ header {
 #cityList li:hover {
 	background-color: #4080ff;
 	border: none;
+	color: white;
+}
+
+#cityList li span {
+	background-color: gray;
+	color: white;
+	border: none;
+	border-radius: 50%;
+	bottom: 2px;
+	cursor: default;
+	font-size: 14px;
+	height: 20px;
+	padding: 1px 3.5px;
+	position: absolute;
+	right: 4px;
+	text-align: center;
+	width: 20px;
+}
+
+#cityList li span:hover {
+	background-color: #ff2000;
 	color: white;
 }
 

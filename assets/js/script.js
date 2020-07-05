@@ -35,10 +35,21 @@ var searchCity = function(event) {
 };
 
 var showSavedCity = function(event) {
-	var cityId = event.target.getAttribute("data-city-id");
+	var cityId
+	
+	if (event.target.tagName === "SPAN") {
+		cityId = event.target.parentNode.getAttribute("data-city-id");
 
-	if ((cityId) && (savedCities[cityId]))
-		getCityInfo(savedCities[cityId]);
+		if ((cityId) && (savedCities[cityId])) {
+			savedCities.splice(cityId, 1);
+			saveCity(null); // Force localStorage update.
+		}
+	} else {
+		cityId = event.target.getAttribute("data-city-id");
+
+		if ((cityId) && (savedCities[cityId]))
+			getCityInfo(savedCities[cityId]);
+	}
 };
 
 var getCityInfo = function(cityName) {
@@ -174,15 +185,17 @@ var displaySavedCities = function() {
 	for (var i = 0; i < savedCities.length; i++) {
 		var listEl = document.createElement("li");
 		listEl.setAttribute("data-city-id", i);
-		listEl.textContent = savedCities[i];
+		listEl.innerHTML = savedCities[i] + "<span class='oi' data-glyph='x'></span>";
 		cityListEl.appendChild(listEl);
 	}
 };
 
 var saveCity = function(cityName) {
 	if (savedCities.indexOf(cityName) < 0) {
-		savedCities.push(cityName);
-		savedCities.sort();
+		if (cityName) {
+			savedCities.push(cityName);
+			savedCities.sort();
+		}
 
 		localStorage.setItem("dashboardCities", JSON.stringify(savedCities));
 
