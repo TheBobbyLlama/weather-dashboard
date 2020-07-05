@@ -14,18 +14,17 @@
 	<div class="main">
 		<div id="searchpanel">
 			<h2>Search for a City:</h2>
-			<div class="searchForm">
+			<form class="searchForm">
 				<input type="text" id="city" />
-				<span class="oi" data-glyph="magnifying-glass"></span>
-			</div>
-			<!-- Search history. -->
-			<ul></ul>
+				<button type="submit" id="searchBtn"><span class="oi" data-glyph="magnifying-glass"></span></button>
+			</form>
+			<!-- Search history will go here. -->
+			<ul id="cityList"></ul>
 		</div>
-		<div id="result">
-			<div>TODO!</div>
-			<div>More work!</div>
-		</div>
+		<!-- Current weather and forecast info will go here. -->
+		<div id="result"></div>
 	</div>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js"></script>
 	<script src="assets/js/script.js"></script>
 </body>
 </html>
