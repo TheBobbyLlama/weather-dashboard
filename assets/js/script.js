@@ -65,21 +65,17 @@ var getCityInfo = function(cityName) {
 				response.json().then(function(data) {
 					curCity = data.name;
 
-					fetch("http://api.openweathermap.org/data/2.5/onecall?lat=" + data.coord.lat + "&lon=" + data.coord.lon + "&exclude=minutely,hourly&units=imperial&cnt=5&appid=" + buildKey)
+					fetch("https://api.openweathermap.org/data/2.5/onecall?lat=" + data.coord.lat + "&lon=" + data.coord.lon + "&exclude=minutely,hourly&units=imperial&cnt=5&appid=" + buildKey)
 					.then(function(response) {
 						if (response.ok) {
 							response.json().then(showWeatherInfo);
 						} else {
-							var errorEl = document.createElement("div");
-							errorEl.innerHTML = "<h3 class='error'>Forecast Error: " + response.statusText + "</h3>";
-							resultEl.appendChild(errorEl);
+							resultEl.innerHTML = "<h3 class='error'>Forecast Error: " + response.statusText + "</h3>";
 							return;
 						}
 					})
 					.catch(function(error) {
-						var errorEl = document.createElement("div");
-						errorEl.innerHTML = "<h3 class='error'>Forecast Error: Unable to connect to OpenWeather API.</h3>";
-						resultEl.appendChild(errorEl);
+						resultEl.innerHTML = "<h3 class='error'>Forecast Error: Unable to connect to OpenWeather API.</h3>";
 					});
 				});
 			} else {
