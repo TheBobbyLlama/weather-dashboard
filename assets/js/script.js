@@ -90,6 +90,8 @@ var getCityInfo = function(cityName) {
 		.catch(function(error) {
 			resultEl.innerHTML = "<h3 class='error'>Error: Unable to connect to OpenWeather API.</h3>";
 		});
+	
+	cityEl.value = "";
 };
 
 var showWeatherInfo = function(data) {
