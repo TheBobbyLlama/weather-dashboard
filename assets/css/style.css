@@ -166,6 +166,8 @@ header {
 
 /* Used to color UV Index */
 .uvNone {
+	background-color: #206010;
+	color: white;
 	padding: 4px;
 }
 
