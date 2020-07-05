@@ -11,6 +11,9 @@ var myKey = [
 	"1008",
 ];
 
+var uvLevels = [ "uvNone", "uvWarning", "uvDanger" ];
+
+var curCity;
 var savedCities = JSON.parse(localStorage.getItem("dashboardCities")) || [];
 
 var cityEl = document.querySelector("#city");
@@ -29,14 +32,14 @@ var searchCity = function(event) {
 	}
 
 	getCityInfo(myCity);
-}
+};
 
 var showSavedCity = function(event) {
 	var cityId = event.target.getAttribute("data-city-id");
 
 	if ((cityId) && (savedCities[cityId]))
 		getCityInfo(savedCities[cityId]);
-}
+};
 
 var getCityInfo = function(cityName) {
 	var buildKey = "";
@@ -45,14 +48,28 @@ var getCityInfo = function(cityName) {
 		buildKey += myKey[(5 * i) % myKey.length];
 	}
 
-	fetch("https://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&appid=" + buildKey)
+	fetch("https://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&units=imperial&appid=" + buildKey)
 		.then(function(response) {
 			if (response.ok) {
 				response.json().then(function(data) {
-					resultEl.innerHTML = "";
-					showCurrentWeather(data); // Also use this to pull out a properly formatted city name.
-					showForecast(data.sys.id);
-					saveCity(data.name);
+					curCity = data.name;
+
+					fetch("http://api.openweathermap.org/data/2.5/onecall?lat=" + data.coord.lat + "&lon=" + data.coord.lon + "&exclude=minutely,hourly&units=imperial&cnt=5&appid=" + buildKey)
+					.then(function(response) {
+						if (response.ok) {
+							response.json().then(showWeatherInfo);
+						} else {
+							var errorEl = document.createElement("div");
+							errorEl.innerHTML = "<h3 class='error'>Forecast Error: " + response.statusText + "</h3>";
+							resultEl.appendChild(errorEl);
+							return;
+						}
+					})
+					.catch(function(error) {
+						var errorEl = document.createElement("div");
+						errorEl.innerHTML = "<h3 class='error'>Forecast Error: Unable to connect to OpenWeather API.</h3>";
+						resultEl.appendChild(errorEl);
+					});
 				});
 			} else {
 				resultEl.innerHTML = "<h3 class='error'>Error: " + response.statusText + "</h3>";
@@ -60,47 +77,95 @@ var getCityInfo = function(cityName) {
 			}
 		})
 		.catch(function(error) {
-			// Notice this `.catch()` getting chained onto the end of the `.then()` method
-			alert("Unable to connect to GitHub");
+			resultEl.innerHTML = "<h3 class='error'>Error: Unable to connect to OpenWeather API.</h3>";
 		});
-}
+};
+
+var showWeatherInfo = function(data) {
+	resultEl.innerHTML = "";
+	showCurrentWeather(data);
+	showForecast(data);
+	saveCity(curCity);
+};
 
 var showCurrentWeather = function(data) {
-	var cityName = data.name;
+	var tmpVal;
+	var buildEl;
+	var containerEl = document.createElement("div");
 
+	// ----- Header - City/Date/Icon -----
+	buildEl = document.createElement("h3");
+	buildEl.innerHTML = curCity + " (" + moment().format("MM/DD/YYYY") + ") <img src='http://openweathermap.org/img/wn/" + data.current.weather[0].icon + ".png' />";
+	containerEl.appendChild(buildEl);
+
+	// ----- Temperature -----
+	buildEl = document.createElement("p");
+	buildEl.textContent = "Temperature: " + data.current.temp.toFixed(1) + "°F";
+	containerEl.appendChild(buildEl);
+
+	// ----- Humidity -----
+	buildEl = document.createElement("p");
+	buildEl.textContent = "Humidity: " + data.current.humidity + "%";
+	containerEl.appendChild(buildEl);
+
+	// ----- Wind Speed -----
+	buildEl = document.createElement("p");
+	buildEl.textContent = "Wind Speed: " + data.current.wind_speed + " MPH";
+	containerEl.appendChild(buildEl);
+
+	// ----- UV Index -----
+	tmpVal = data.current.uvi;
+	buildEl = document.createElement("p");
+	buildEl.innerHTML = "UV Index: " + "<span class='" + uvLevels[Math.min(tmpVal / 4, 2)] + "'>" + tmpVal + "</span>";
+	containerEl.appendChild(buildEl);
+
+	resultEl.appendChild(containerEl);
+}
+
+var showForecast = function(data) {
 	console.log(data);
 
 	var buildEl
 	var containerEl = document.createElement("div");
 
-	// ----- Header - City/Date/Icon -----
+	// ----- 5-Day Forecast header -----
 	buildEl = document.createElement("h3");
-	buildEl.innerHTML = cityName + " (" + moment().format("MM/DD/YYYY") + ") <img src='http://openweathermap.org/img/wn/" + data.weather[0].icon + ".png' />";
-	// TODO- Icon!
+	buildEl.textContent = "5-Day Forecast";
 	containerEl.appendChild(buildEl);
 
-	// ----- Temperature -----
-	buildEl = document.createElement("p");
-	buildEl.textContent = "Temperature: " + convertTempKtoF(data.main.temp)
+	// ----- Forecast container -----
+	buildEl = document.createElement("div");
+	buildEl.className = "forecast";
+
+	for (var i = 1; i < 6; i++) {
+		var curBuild;
+		var curDiv = document.createElement("div");
+
+		// ----- Date -----
+		curBuild = document.createElement("h4");
+		curBuild.textContent = moment.unix(data.daily[i].dt).utc().format("MM/DD/YYYY");
+		curDiv.appendChild(curBuild);
+
+		// ----- Icon ----
+		curBuild = document.createElement("img");
+		curBuild.setAttribute("src", "http://openweathermap.org/img/wn/" + data.daily[i].weather[0].icon + ".png");
+		curDiv.appendChild(curBuild);
+
+		// ----- Temperature -----
+		curBuild = document.createElement("p");
+		curBuild.textContent = "Temperature: " + data.daily[i].temp.max.toFixed(1) + "°F";
+		curDiv.appendChild(curBuild);
+
+		// ----- Humidity -----
+		curBuild = document.createElement("p");
+		curBuild.textContent = "Humidity: " + data.daily[i].humidity + "%";
+		curDiv.appendChild(curBuild);
+
+		buildEl.appendChild(curDiv);
+	}
+
 	containerEl.appendChild(buildEl);
-
-	// ----- Humidity -----
-	buildEl = document.createElement("p");
-	buildEl.textContent = "Humidity: " + data.main.humidity + "%";
-	containerEl.appendChild(buildEl);
-
-	// ----- Wind Speed -----
-	buildEl = document.createElement("p");
-	buildEl.textContent = "Wind Speed: " + data.wind.speed + " MPH";
-	containerEl.appendChild(buildEl);
-
-	// Can't get UV Index to appear like mockup???
-
 	resultEl.appendChild(containerEl);
-}
-
-var showForecast = function(cityName) {
-	console.log("Show that forecast!");
 }
 
 var displaySavedCities = function() {
@@ -124,10 +189,6 @@ var saveCity = function(cityName) {
 		displaySavedCities();
 	}
 };
-
-var convertTempKtoF = function(temp) {
-	return (1.8 * temp - 459.67).toFixed(1) + "°F";
-}
 
 searchButton.addEventListener("click", searchCity);
 cityListEl.addEventListener("click", showSavedCity);
